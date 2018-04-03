@@ -1,0 +1,32 @@
+from setuptools import setup
+
+long_description = open('README.md').read()
+
+setup(
+    name='django-storage-text-field',
+    version="0.0.0dev",
+    package_dir={'storage_text_field': 'storage_text_field'},
+    packages=['storage_text_field', 'storage_text_field.tests'],
+    description='Custom Django field for easy saving content of field with storages',  # noqa
+    author='Jason Ward',
+    author_email='jason.ward@policystat.com',
+    license='MIT License',
+    url='http://github.com/PolicyStat/django-storage-text-field/',
+    long_description=long_description,
+    platforms=["any"],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Environment :: Web Environment',
+    ],
+)
