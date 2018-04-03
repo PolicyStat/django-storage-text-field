@@ -4,14 +4,21 @@ from django.core.files.storage import default_storage
 from django.db import connection
 from django.test import TestCase
 
-from storage_text_field.tests.models import Document
+from storage_text_field.tests.models import (
+    CustomerStorageDocument,
+    CustomerStorageObjectDocument,
+    Document,
+)
+from storage_text_field.tests import storages
 
 
-class SmokeTestCase(TestCase):
+class BaseTestCase(TestCase):
     @property
     def html(self):
         return '<p>{}</p>'.format(uuid.uuid4())
 
+
+class SmokeTestCase(BaseTestCase):
     def test_smoke_test(self):
         html = self.html
         document = Document.objects.create(
@@ -35,3 +42,27 @@ class SmokeTestCase(TestCase):
             default_storage.open(html_value).read().decode('utf-8'),
             html,
         )
+
+
+class CustomerStorageTestCase(BaseTestCase):
+    Model = CustomerStorageDocument
+
+    def setUp(self):
+        super(CustomerStorageTestCase, self).setUp()
+        # Clear the custom storage.
+        storages.storage = dict()
+
+    def test_custom_storage_is_used(self):
+        html = self.html
+        self.Model.objects.create(
+            html=html,
+        )
+        self.assertEqual(len(storages.storage), 1)
+        self.assertEqual(
+            list(storages.storage.values())[0],
+            html,
+        )
+
+
+class CustomerStorageObjectTestCase(CustomerStorageTestCase):
+    Model = CustomerStorageObjectDocument
