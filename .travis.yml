@@ -5,6 +5,7 @@ sudo: false
 env:
   - TOX_ENV=py27-django111
   - TOX_ENV=py36-django111
+  - TOX_ENV=py36-django20
   - TOX_ENV=pyake8
 notifications:
   email:
