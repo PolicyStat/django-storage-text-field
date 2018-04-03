@@ -4,10 +4,14 @@ from django.core.files.storage import default_storage
 from django.db import connection
 from django.test import TestCase
 
+from unittest import skip
+
 from storage_text_field.tests.models import (
     CustomerStorageDocument,
     CustomerStorageObjectDocument,
     Document,
+    PreSaveHookDocument,
+    pre_save_hook,
 )
 from storage_text_field.tests import storages
 
@@ -17,6 +21,9 @@ class BaseTestCase(object):
     def html(self):
         return '<p>{}</p>'.format(uuid.uuid4())
 
+    def pre_save_hook(self, value):
+        return value
+
     def get_filepath_from_db(self, obj):
         cursor = connection.cursor()
 
@@ -25,13 +32,21 @@ class BaseTestCase(object):
         file_path = cursor.fetchone()[0]
         return file_path
 
+    def format_expected_value(self, value):
+        return self.pre_save_hook(value)
+
     def test_smoke_test(self):
         html = self.html
         document = self.Model.objects.create(
             html=html,
         )
         document.refresh_from_db()
-        self.assertEqual(document.html, html)
+        self.assertEqual(document.html, self.format_expected_value(html))
+
+    def test_field_can_be_blank(self):
+        document = self.Model.objects.create()
+        document.refresh_from_db()
+        self.assertEqual(document.html, self.format_expected_value(''))
 
     def test_only_save_on_storage_once(self):
         html = self.html
@@ -101,3 +116,22 @@ class CustomerStorageTestCase(BaseTestCase, TestCase):
 
 class CustomerStorageObjectTestCase(CustomerStorageTestCase):
     Model = CustomerStorageObjectDocument
+
+
+class PreSaveHookTestCase(BaseTestCase, TestCase):
+    Model = PreSaveHookDocument
+
+    def pre_save_hook(self, value):
+        return pre_save_hook(value)
+
+    def test_html_is_updated_because_of_pre_save_hook(self):
+        html = self.html
+        document = self.Model.objects.create(
+            html=html,
+        )
+        document.refresh_from_db()
+        self.assertEqual(document.html, self.pre_save_hook(html))
+
+    @skip('This test does not work with only the pre save hook')
+    def test_only_save_on_storage_once(self):
+        pass
