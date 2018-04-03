@@ -9,3 +9,8 @@ DATABASES = {
         'NAME': ':memory:',
     }
 }
+
+
+INSTALLED_APPS = [
+    'storage_text_field.tests',
+]
