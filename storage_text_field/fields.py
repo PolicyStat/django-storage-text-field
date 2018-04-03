@@ -14,16 +14,30 @@ def default_pre_save_hook(value):
     return value
 
 
+def default_from_db_hook(value):
+    return value
+
+
 class StorageTextField(models.CharField):
-    def __init__(self, storage=None, pre_save_hook=None, *args, **kwargs):
+    def __init__(
+            self,
+            storage=None,
+            pre_save_hook=None,
+            from_db_hook=None,
+            *args,
+            **kwargs
+    ):
         if storage is None:
             storage = default_storage
         if not isinstance(storage, Storage):
             storage = get_storage_class(storage)()
         if not pre_save_hook:
             pre_save_hook = default_pre_save_hook
+        if not from_db_hook:
+            from_db_hook = default_from_db_hook
         self.storage = storage
         self.pre_save_hook = pre_save_hook
+        self.from_db_hook = from_db_hook
         kwargs['max_length'] = 200
         super(StorageTextField, self).__init__(*args, **kwargs)
 
@@ -48,4 +62,6 @@ class StorageTextField(models.CharField):
         return super(StorageTextField, self).get_prep_value(file_path)
 
     def from_db_value(self, value, expression, connection, context):
-        return self.storage.open(value).read().decode('utf-8')
+        content = self.storage.open(value).read()
+        content = self.from_db_hook(content)
+        return content.decode('utf-8')

@@ -28,3 +28,14 @@ class PreSaveHookDocument(models.Model):
     html = StorageTextField(
         pre_save_hook=pre_save_hook,
     )
+
+
+def from_db_hook(value):
+    # Strip off the p tag.
+    return value[3:-4]
+
+
+class FromDBHookDocument(models.Model):
+    html = StorageTextField(
+        from_db_hook=from_db_hook,
+    )

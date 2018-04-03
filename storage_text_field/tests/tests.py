@@ -10,7 +10,9 @@ from storage_text_field.tests.models import (
     CustomerStorageDocument,
     CustomerStorageObjectDocument,
     Document,
+    FromDBHookDocument,
     PreSaveHookDocument,
+    from_db_hook,
     pre_save_hook,
 )
 from storage_text_field.tests import storages
@@ -24,16 +26,22 @@ class BaseTestCase(object):
     def pre_save_hook(self, value):
         return value
 
+    def from_db_hook(self, value):
+        return value
+
     def get_filepath_from_db(self, obj):
         cursor = connection.cursor()
 
-        query = 'SELECT html from %s WHERE id = %d'
-        cursor.execute(query % (obj._meta.db_table, obj.pk))
+        query = 'SELECT html from {db_table} WHERE id = {pk}'
+        cursor.execute(query.format(
+            db_table=obj._meta.db_table,
+            pk=obj.pk,
+        ))
         file_path = cursor.fetchone()[0]
         return file_path
 
     def format_expected_value(self, value):
-        return self.pre_save_hook(value)
+        return self.from_db_hook(self.pre_save_hook(value))
 
     def test_smoke_test(self):
         html = self.html
@@ -135,3 +143,22 @@ class PreSaveHookTestCase(BaseTestCase, TestCase):
         )
         document.refresh_from_db()
         self.assertEqual(document.html, self.pre_save_hook(html))
+
+
+class FromDBHookTestCase(BaseTestCase, TestCase):
+    Model = FromDBHookDocument
+
+    def from_db_hook(self, value):
+        return from_db_hook(value)
+
+    @skip('This test does not work with only the pre save hook')
+    def test_only_save_on_storage_once(self):
+        pass
+
+    def test_html_is_updated_because_of_from_db_hook(self):
+        html = self.html
+        document = self.Model.objects.create(
+            html=html,
+        )
+        document.refresh_from_db()
+        self.assertEqual(document.html, self.from_db_hook(html))
