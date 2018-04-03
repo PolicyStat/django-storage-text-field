@@ -31,10 +31,12 @@ class StorageTextField(models.CharField):
         return os.path.join(digest.encode('utf-8'), str_self)
 
     def get_prep_value(self, value):
-        file_path = self.storage.save(
-            self.get_file_path(value).decode('utf-8'),
-            ContentFile(value),
-        )
+        file_path = self.get_file_path(value).decode('utf-8')
+        if not self.storage.exists(file_path):
+            file_path = self.storage.save(
+                file_path,
+                ContentFile(value),
+            )
         return super(StorageTextField, self).get_prep_value(file_path)
 
     def from_db_value(self, value, expression, connection, context):
