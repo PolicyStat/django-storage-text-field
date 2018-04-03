@@ -9,6 +9,8 @@ class CustomerStorage(Storage):
         return key in storage
 
     def _save(self, name, content):
+        if self.exists(name):
+            raise AssertionError('This is not supposed to happen')
         storage[name] = content.file.read()
         return name
 

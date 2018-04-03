@@ -12,39 +12,58 @@ from storage_text_field.tests.models import (
 from storage_text_field.tests import storages
 
 
-class BaseTestCase(TestCase):
+class BaseTestCase(object):
     @property
     def html(self):
         return '<p>{}</p>'.format(uuid.uuid4())
 
+    def get_filepath_from_db(self, obj):
+        cursor = connection.cursor()
 
-class SmokeTestCase(BaseTestCase):
+        query = 'SELECT html from %s WHERE id = %d'
+        cursor.execute(query % (obj._meta.db_table, obj.pk))
+        file_path = cursor.fetchone()[0]
+        return file_path
+
     def test_smoke_test(self):
         html = self.html
-        document = Document.objects.create(
+        document = self.Model.objects.create(
             html=html,
         )
         document.refresh_from_db()
         self.assertEqual(document.html, html)
 
+    def test_only_save_on_storage_once(self):
+        html = self.html
+        document = self.Model.objects.create(
+            html=html,
+        )
+        document.refresh_from_db()
+        original_file_path = self.get_filepath_from_db(document)
+        document.save()
+        self.assertEqual(
+            original_file_path,
+            self.get_filepath_from_db(document),
+        )
+
+
+class SmokeTestCase(BaseTestCase, TestCase):
+    Model = Document
+
     def test_db_is_saving_file_path_to_content(self):
         html = self.html
-        document = Document.objects.create(
+        document = self.Model.objects.create(
             html=html,
         )
 
-        cursor = connection.cursor()
-
-        query = 'SELECT html from tests_document WHERE id = %d'
-        cursor.execute(query % document.pk)
-        html_value = cursor.fetchone()[0]
+        html_file_path = self.get_filepath_from_db(document)
         self.assertEqual(
-            default_storage.open(html_value).read().decode('utf-8'),
+            default_storage.open(html_file_path).read().decode('utf-8'),
             html,
         )
 
 
-class CustomerStorageTestCase(BaseTestCase):
+class CustomerStorageTestCase(BaseTestCase, TestCase):
     Model = CustomerStorageDocument
 
     def setUp(self):
