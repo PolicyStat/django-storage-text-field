@@ -46,6 +46,22 @@ class BaseTestCase(object):
             self.get_filepath_from_db(document),
         )
 
+    def test_changing_the_content_changes_the_filepath(self):
+        html = self.html
+        document = self.Model.objects.create(
+            html=html,
+        )
+        document.refresh_from_db()
+        original_file_path = self.get_filepath_from_db(document)
+
+        # self.html creates new custom HTML.
+        document.html = self.html
+        document.save()
+        self.assertNotEqual(
+            original_file_path,
+            self.get_filepath_from_db(document),
+        )
+
 
 class SmokeTestCase(BaseTestCase, TestCase):
     Model = Document
