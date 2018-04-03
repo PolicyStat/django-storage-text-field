@@ -1,0 +1,11 @@
+language: python
+install: pip install tox
+script: tox -v -e $TOX_ENV -- --verbose
+sudo: false
+env:
+  - TOX_ENV=py27-django111
+  - TOX_ENV=py36-django111
+  - TOX_ENV=pyake8
+notifications:
+  email:
+    - jason.louard.ward@gmail.com
