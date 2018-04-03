@@ -1,3 +1,4 @@
+import os
 import uuid
 
 
@@ -14,3 +15,8 @@ DATABASES = {
 INSTALLED_APPS = [
     'storage_text_field.tests',
 ]
+
+MEDIA_ROOT = os.path.join(
+    os.path.dirname(__file__),
+    'media_root',
+)
