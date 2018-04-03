@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Files for tests.
+storage_text_field/tests/media_root
