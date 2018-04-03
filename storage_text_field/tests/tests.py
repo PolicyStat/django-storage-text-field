@@ -124,6 +124,10 @@ class PreSaveHookTestCase(BaseTestCase, TestCase):
     def pre_save_hook(self, value):
         return pre_save_hook(value)
 
+    @skip('This test does not work with only the pre save hook')
+    def test_only_save_on_storage_once(self):
+        pass
+
     def test_html_is_updated_because_of_pre_save_hook(self):
         html = self.html
         document = self.Model.objects.create(
@@ -131,7 +135,3 @@ class PreSaveHookTestCase(BaseTestCase, TestCase):
         )
         document.refresh_from_db()
         self.assertEqual(document.html, self.pre_save_hook(html))
-
-    @skip('This test does not work with only the pre save hook')
-    def test_only_save_on_storage_once(self):
-        pass
