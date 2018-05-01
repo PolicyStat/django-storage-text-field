@@ -1,13 +1,14 @@
 from setuptools import setup
 
-long_description = open('README.md').read()
+with open('README.md') as f:
+    long_description = f.read()
 
 setup(
     name='django-storage-text-field',
     version="0.0.0dev",
     package_dir={'storage_text_field': 'storage_text_field'},
     packages=['storage_text_field', 'storage_text_field.tests'],
-    description='Custom Django field for easy saving content of field with storages',  # noqa
+    description='Custom Django field that saves content to storages and a reference to the stored file in the database.',  # noqa
     author='Jason Ward',
     author_email='jason.ward@policystat.com',
     license='MIT License',

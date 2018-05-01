@@ -1,22 +1,22 @@
 from django.db import models
 
 from storage_text_field.fields import StorageTextField
-from storage_text_field.tests.storages import CustomerStorage
+from storage_text_field.tests.storages import CustomStorage
 
 
 class Document(models.Model):
     html = StorageTextField()
 
 
-class CustomerStorageDocument(models.Model):
+class CustomStorageDocument(models.Model):
     html = StorageTextField(
-        storage='storage_text_field.tests.storages.CustomerStorage',
+        storage='storage_text_field.tests.storages.CustomStorage',
     )
 
 
-class CustomerStorageObjectDocument(models.Model):
+class CustomStorageObjectDocument(models.Model):
     html = StorageTextField(
-        storage=CustomerStorage(),
+        storage=CustomStorage(),
     )
 
 

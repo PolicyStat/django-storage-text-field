@@ -10,4 +10,4 @@ env:
   - TOX_ENV=flake8
 notifications:
   email:
-    - jason.louard.ward@gmail.com
+    - jason.ward@policystat.com

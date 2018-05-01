@@ -7,8 +7,8 @@ from django.test import TestCase
 from unittest import skip
 
 from storage_text_field.tests.models import (
-    CustomerStorageDocument,
-    CustomerStorageObjectDocument,
+    CustomStorageDocument,
+    CustomStorageObjectDocument,
     Document,
     FromDBHookDocument,
     PreSaveHookDocument,
@@ -32,6 +32,9 @@ class BaseTestCase(object):
     def get_filepath_from_db(self, obj):
         cursor = connection.cursor()
 
+        # You are not supposed to use string formatting when doing SQL queries,
+        # but I hate the way we are supposed to do this. Since this is a test,
+        # there is no chance of a SQL injection.
         query = 'SELECT html from {db_table} WHERE id = {pk}'
         cursor.execute(query.format(
             db_table=obj._meta.db_table,
@@ -96,17 +99,16 @@ class SmokeTestCase(BaseTestCase, TestCase):
         )
 
         html_file_path = self.get_filepath_from_db(document)
-        self.assertEqual(
-            default_storage.open(html_file_path).read().decode('utf-8'),
-            html,
-        )
+        with default_storage.open(html_file_path) as f:
+            file_contents = f.read().decode('utf-8')
+        self.assertEqual(file_contents, html)
 
 
-class CustomerStorageTestCase(BaseTestCase, TestCase):
-    Model = CustomerStorageDocument
+class CustomStorageTestCase(BaseTestCase, TestCase):
+    Model = CustomStorageDocument
 
     def setUp(self):
-        super(CustomerStorageTestCase, self).setUp()
+        super(CustomStorageTestCase, self).setUp()
         # Clear the custom storage.
         storages.storage = dict()
 
@@ -122,8 +124,8 @@ class CustomerStorageTestCase(BaseTestCase, TestCase):
         )
 
 
-class CustomerStorageObjectTestCase(CustomerStorageTestCase):
-    Model = CustomerStorageObjectDocument
+class CustomStorageObjectTestCase(CustomStorageTestCase):
+    Model = CustomStorageObjectDocument
 
 
 class PreSaveHookTestCase(BaseTestCase, TestCase):
