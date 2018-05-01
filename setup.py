@@ -1,6 +1,7 @@
 from setuptools import setup
 
-long_description = open('README.md').read()
+with open('README.md') as f:
+    long_description = f.read()
 
 setup(
     name='django-storage-text-field',
