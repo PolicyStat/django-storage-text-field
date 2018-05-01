@@ -32,6 +32,9 @@ class BaseTestCase(object):
     def get_filepath_from_db(self, obj):
         cursor = connection.cursor()
 
+        # You are not supposed to use string formatting when doing SQL queries,
+        # but I hate the way we are supposed to do this. Since this is a test,
+        # there is no chance of a SQL injection.
         query = 'SELECT html from {db_table} WHERE id = {pk}'
         cursor.execute(query.format(
             db_table=obj._meta.db_table,
