@@ -10,9 +10,7 @@ class CustomStorage(Storage):
 
     def _save(self, name, content):
         if self.exists(name):
-            # We need to show that _save is not called if the file already
-            # exists.
-            raise AssertionError('This is not supposed to happen')
+            raise AssertionError('File already exists, not overwriting it')
         storage[name] = content.file.read()
         return name
 
