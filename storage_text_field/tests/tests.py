@@ -96,10 +96,9 @@ class SmokeTestCase(BaseTestCase, TestCase):
         )
 
         html_file_path = self.get_filepath_from_db(document)
-        self.assertEqual(
-            default_storage.open(html_file_path).read().decode('utf-8'),
-            html,
-        )
+        with default_storage.open(html_file_path) as f:
+            file_contents = f.read().decode('utf-8')
+        self.assertEqual(file_contents, html)
 
 
 class CustomStorageTestCase(BaseTestCase, TestCase):
