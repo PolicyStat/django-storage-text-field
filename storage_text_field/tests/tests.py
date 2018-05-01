@@ -7,8 +7,8 @@ from django.test import TestCase
 from unittest import skip
 
 from storage_text_field.tests.models import (
-    CustomerStorageDocument,
-    CustomerStorageObjectDocument,
+    CustomStorageDocument,
+    CustomStorageObjectDocument,
     Document,
     FromDBHookDocument,
     PreSaveHookDocument,
@@ -102,11 +102,11 @@ class SmokeTestCase(BaseTestCase, TestCase):
         )
 
 
-class CustomerStorageTestCase(BaseTestCase, TestCase):
-    Model = CustomerStorageDocument
+class CustomStorageTestCase(BaseTestCase, TestCase):
+    Model = CustomStorageDocument
 
     def setUp(self):
-        super(CustomerStorageTestCase, self).setUp()
+        super(CustomStorageTestCase, self).setUp()
         # Clear the custom storage.
         storages.storage = dict()
 
@@ -122,8 +122,8 @@ class CustomerStorageTestCase(BaseTestCase, TestCase):
         )
 
 
-class CustomerStorageObjectTestCase(CustomerStorageTestCase):
-    Model = CustomerStorageObjectDocument
+class CustomStorageObjectTestCase(CustomStorageTestCase):
+    Model = CustomStorageObjectDocument
 
 
 class PreSaveHookTestCase(BaseTestCase, TestCase):
