@@ -44,6 +44,9 @@ class StorageTextField(models.CharField):
     def deconstruct(self):
         name, path, args, kwargs = super(StorageTextField, self).deconstruct()
         del kwargs['max_length']
+        kwargs['pre_save_hook'] = self.pre_save_hook
+        kwargs['from_db_hook'] = self.from_db_hook
+        kwargs['storage'] = self.storage
         return name, path, args, kwargs
 
     def get_file_path(self, value):
