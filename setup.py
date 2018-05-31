@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='django-storage-text-field',
-    version="1.2.0",
+    version="1.3.0",
     package_dir={'storage_text_field': 'storage_text_field'},
     packages=['storage_text_field', 'storage_text_field.tests'],
     description='Custom Django field that saves content to storages and a reference to the stored file in the database.',  # noqa
