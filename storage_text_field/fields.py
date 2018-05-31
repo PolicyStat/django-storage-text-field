@@ -18,12 +18,17 @@ def default_from_db_hook(value):
     return value
 
 
+def default_file_path_hook(value):
+    return value
+
+
 class StorageTextField(models.CharField):
     def __init__(
             self,
             storage=None,
             pre_save_hook=None,
             from_db_hook=None,
+            file_path_hook=None,
             *args,
             **kwargs
     ):
@@ -35,9 +40,12 @@ class StorageTextField(models.CharField):
             pre_save_hook = default_pre_save_hook
         if not from_db_hook:
             from_db_hook = default_from_db_hook
+        if not file_path_hook:
+            file_path_hook = default_file_path_hook
         self.storage = storage
         self.pre_save_hook = pre_save_hook
         self.from_db_hook = from_db_hook
+        self.file_path_hook = file_path_hook
         kwargs['max_length'] = 200
         super(StorageTextField, self).__init__(*args, **kwargs)
 
@@ -46,13 +54,17 @@ class StorageTextField(models.CharField):
         del kwargs['max_length']
         kwargs['pre_save_hook'] = self.pre_save_hook
         kwargs['from_db_hook'] = self.from_db_hook
+        kwargs['file_path_hook'] = self.file_path_hook
         kwargs['storage'] = self.storage
         return name, path, args, kwargs
 
     def get_file_path(self, value):
         str_self = str(self).encode('utf-8')
         digest = hashlib.sha224(str_self + value.encode('utf-8')).hexdigest()
-        return os.path.join(digest.encode('utf-8'), str_self)
+        return self.file_path_hook(os.path.join(
+            digest.encode('utf-8'),
+            str_self,
+        ))
 
     def get_prep_value(self, value):
         value = self.pre_save_hook(value)
