@@ -79,4 +79,7 @@ class StorageTextField(models.CharField):
     def from_db_value(self, value, expression, connection, context):
         content = self.storage.open(value).read()
         content = self.from_db_hook(content)
-        return content.decode('utf-8')
+        try:
+            return content.decode('utf-8')
+        except UnicodeEncodeError:
+            return content
