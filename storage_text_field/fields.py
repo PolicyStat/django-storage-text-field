@@ -80,11 +80,13 @@ class StorageTextField(models.CharField):
             )
         return super(StorageTextField, self).get_prep_value(file_path)
 
-    @lazy
     def from_db_value(self, value, expression, connection, context):
-        content = self.storage.open(value).read()
-        content = self.from_db_hook(content)
-        try:
-            return content.decode('utf-8')
-        except UnicodeEncodeError:
-            return content
+        def result():
+            content = self.storage.open(value).read()
+            content = self.from_db_hook(content)
+            try:
+                return six.text_type(content.decode('utf-8'))
+            except UnicodeEncodeError:
+                return six.text_type(content)
+
+        return lazy(result, six.text_type)()
