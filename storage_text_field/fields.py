@@ -1,5 +1,6 @@
 import hashlib
 import os
+import six
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import (
@@ -62,7 +63,7 @@ class StorageTextField(models.CharField):
     def get_file_path(self, value):
         str_self = str(self).encode('utf-8')
         digest = hashlib.sha224(
-            str_self + str(value).encode('utf-8')
+            str_self + six.text_type(value).encode('utf-8')
         ).hexdigest()
         return self.file_path_hook(os.path.join(
             digest.encode('utf-8'),

@@ -15,6 +15,9 @@ setup(
     url='http://github.com/PolicyStat/django-storage-text-field/',
     long_description=long_description,
     platforms=["any"],
+    install_requiers=[
+        'six>=1.10.0,<2',
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
