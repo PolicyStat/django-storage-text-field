@@ -8,6 +8,7 @@ from django.core.files.storage import (
     get_storage_class,
 )
 from django.db import models
+from django.utils.functional import lazy
 
 
 def default_pre_save_hook(value):
@@ -60,7 +61,9 @@ class StorageTextField(models.CharField):
 
     def get_file_path(self, value):
         str_self = str(self).encode('utf-8')
-        digest = hashlib.sha224(str_self + value.encode('utf-8')).hexdigest()
+        digest = hashlib.sha224(
+            str_self + str(value).encode('utf-8')
+        ).hexdigest()
         return self.file_path_hook(os.path.join(
             digest.encode('utf-8'),
             str_self,
@@ -76,6 +79,7 @@ class StorageTextField(models.CharField):
             )
         return super(StorageTextField, self).get_prep_value(file_path)
 
+    @lazy
     def from_db_value(self, value, expression, connection, context):
         content = self.storage.open(value).read()
         content = self.from_db_hook(content)
