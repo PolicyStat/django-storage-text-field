@@ -74,6 +74,7 @@ class StorageTextField(models.CharField):
         kwargs['from_db_hook'] = self.from_db_hook
         kwargs['file_path_hook'] = self.file_path_hook
         kwargs['storage'] = self.storage
+        kwargs['use_cache'] = self.use_cache
         return name, path, args, kwargs
 
     def get_file_path(self, value):
