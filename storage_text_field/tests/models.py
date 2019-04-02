@@ -39,3 +39,7 @@ class FromDBHookDocument(models.Model):
     html = StorageTextField(
         from_db_hook=from_db_hook,
     )
+
+
+class UseCacheDocument(models.Model):
+    html = StorageTextField(use_cache=True)
