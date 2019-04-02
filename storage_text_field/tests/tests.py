@@ -12,6 +12,7 @@ from storage_text_field.tests.models import (
     Document,
     FromDBHookDocument,
     PreSaveHookDocument,
+    UseCacheDocument,
     from_db_hook,
     pre_save_hook,
 )
@@ -164,3 +165,25 @@ class FromDBHookTestCase(BaseTestCase, TestCase):
         )
         document.refresh_from_db()
         self.assertEqual(document.html, self.from_db_hook(html))
+
+
+class UseCacheTestCase(BaseTestCase, TestCase):
+    Model = UseCacheDocument
+
+    def test_cache_is_used(self):
+        html = self.html
+        document = self.Model.objects.create(
+            html=html,
+        )
+        # Pull html from the storage to prime the cache.
+        document = self.Model.objects.get(pk=document.pk)
+        self.assertEqual(document.html, html)
+
+        # Remove the content from the storage.
+        storage = document._meta.get_field('html').storage
+        original_file_path = self.get_filepath_from_db(document)
+        storage.delete(original_file_path)
+
+        # This would fail if the cache was not being used.
+        document = self.Model.objects.get(pk=document.pk)
+        self.assertEqual(document.html, html)
