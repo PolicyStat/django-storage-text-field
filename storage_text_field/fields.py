@@ -2,6 +2,8 @@ import hashlib
 import os
 import six
 
+from django.conf import settings
+from django.core.cache import caches
 from django.core.files.base import ContentFile
 from django.core.files.storage import (
     Storage,
@@ -31,6 +33,7 @@ class StorageTextField(models.CharField):
             pre_save_hook=None,
             from_db_hook=None,
             file_path_hook=None,
+            use_cache=False,
             *args,
             **kwargs
     ):
@@ -48,6 +51,19 @@ class StorageTextField(models.CharField):
         self.pre_save_hook = pre_save_hook
         self.from_db_hook = from_db_hook
         self.file_path_hook = file_path_hook
+        self.use_cache = use_cache
+        if self.use_cache:
+            self.cache_config = getattr(
+                settings,
+                'STORAGE_TEXT_FIELD_CACHE_CONFIG',
+                'default',
+            )
+            self.cache_duration = getattr(
+                settings,
+                'STORAGE_TEXT_FIELD_CACHE_DURATION',
+                60 * 60 * 24,  # One Day
+            )
+            self.cache = caches[self.cache_config]
         kwargs['max_length'] = 200
         super(StorageTextField, self).__init__(*args, **kwargs)
 
@@ -81,12 +97,23 @@ class StorageTextField(models.CharField):
         return super(StorageTextField, self).get_prep_value(file_path)
 
     def from_db_value(self, value, expression, connection, context):
+        def get_from_storage():
+            return self.storage.open(value).read()
+
         def result():
-            content = self.storage.open(value).read()
+            if self.use_cache:
+                content = self.cache.get(value)
+                if content is None:
+                    content = get_from_storage()
+            else:
+                content = get_from_storage()
             content = self.from_db_hook(content)
             try:
-                return six.text_type(content.decode('utf-8'))
-            except UnicodeEncodeError:
-                return six.text_type(content)
+                return_value = six.text_type(content.decode('utf-8'))
+            except (UnicodeEncodeError, AttributeError):
+                return_value = six.text_type(content)
+            if self.use_cache:
+                self.cache.set(value, return_value, self.cache_duration)
+            return return_value
 
         return lazy(result, six.text_type)()
