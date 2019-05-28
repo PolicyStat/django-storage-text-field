@@ -1,5 +1,6 @@
 import hashlib
 import os
+
 import six
 
 from django.conf import settings
@@ -12,6 +13,7 @@ from django.core.files.storage import (
 )
 from django.db import models
 from django.utils.functional import lazy
+from django.utils.encoding import force_bytes, force_text
 
 
 def default_pre_save_hook(value):
@@ -78,18 +80,16 @@ class StorageTextField(models.CharField):
         return name, path, args, kwargs
 
     def get_file_path(self, value):
-        str_self = str(self).encode('utf-8')
-        digest = hashlib.sha224(
-            str_self + six.text_type(value).encode('utf-8')
-        ).hexdigest()
+        bytes_self = force_bytes(self)
+        digest = hashlib.sha224(bytes_self + force_bytes(value)).hexdigest()
         return self.file_path_hook(os.path.join(
-            digest.encode('utf-8'),
-            str_self,
+            force_bytes(digest),
+            bytes_self,
         ))
 
     def get_prep_value(self, value):
         value = self.pre_save_hook(value)
-        file_path = self.get_file_path(value).decode('utf-8')
+        file_path = force_text(self.get_file_path(value))
         if not self.storage.exists(file_path):
             file_path = self.storage.save(
                 file_path,
@@ -109,10 +109,7 @@ class StorageTextField(models.CharField):
             else:
                 content = get_from_storage()
             content = self.from_db_hook(content)
-            try:
-                return_value = six.text_type(content.decode('utf-8'))
-            except (UnicodeEncodeError, AttributeError):
-                return_value = six.text_type(content)
+            return_value = force_text(content)
             if self.use_cache:
                 self.cache.set(value, return_value, self.cache_duration)
             return return_value
