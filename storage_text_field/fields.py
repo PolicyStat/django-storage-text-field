@@ -97,7 +97,7 @@ class StorageTextField(models.CharField):
             )
         return super(StorageTextField, self).get_prep_value(file_path)
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         def get_from_storage():
             return self.storage.open(value).read()
 
