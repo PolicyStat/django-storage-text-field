@@ -5,7 +5,7 @@ with open('README.md') as f:
 
 setup(
     name='django-storage-text-field',
-    version="1.5.2",
+    version="1.6.0",
     package_dir={'storage_text_field': 'storage_text_field'},
     packages=['storage_text_field', 'storage_text_field.tests'],
     description='Custom Django field that saves content to storages and a reference to the stored file in the database.',  # noqa
@@ -15,7 +15,7 @@ setup(
     url='http://github.com/PolicyStat/django-storage-text-field/',
     long_description=long_description,
     platforms=["any"],
-    install_requiers=[
+    install_requires=[
         'six>=1.10.0,<2',
     ],
     classifiers=[
